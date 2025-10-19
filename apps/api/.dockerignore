@@ -1,0 +1,53 @@
+# Docker
+.dockerignore
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Tests
+coverage/
+.nyc_output/
+test/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Drizzle
+src/drizzle/migrations/
+
+# NestJS
+nest-cli.json

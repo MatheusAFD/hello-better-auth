@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: api-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nestdb}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - api-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    container_name: api-dev
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3001}:3001'
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-nestdb}
+      PORT: ${PORT:-3001}
+      NODE_ENV: ${NODE_ENV:-development}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    volumes:
+      - ../..:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+      - api_node_modules:/usr/src/app/apps/api/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - api-network
+    command: sh -c "pnpm db:push && pnpm run dev"
+
+volumes:
+  postgres_data:
+    driver: local
+  node_modules:
+    driver: local
+  api_node_modules:
+    driver: local
+
+networks:
+  api-network:
+    driver: bridge
